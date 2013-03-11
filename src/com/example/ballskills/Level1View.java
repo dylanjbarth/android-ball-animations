@@ -17,11 +17,12 @@ public class Level1View extends View {
 	private int xMax;
 	private int yMax;
 	// Ball attributes
-	private float ballRadius = 80;
+	private float ballRadius = 30;
 	private float ballX = ballRadius + 20;
 	private float ballY = ballRadius + 40;
 	private float ballSpeedX = 5;
 	private float ballSpeedY = 3;
+	private float maxSpeed = 10;
 	private RectF ballBounds;
 	private Paint ballColor;
 	// For touch input
@@ -53,7 +54,10 @@ public class Level1View extends View {
 
 		// Perform position calculations
 		update();
-
+		System.out.print("ballSpeedX: ");
+		System.out.println(ballSpeedX);
+		System.out.print("ballSpeedY: ");
+		System.out.println(ballSpeedY);
 		// Delay for the old human eyes to catch up
 		try {
 			Thread.sleep(3);
@@ -99,9 +103,25 @@ public class Level1View extends View {
 			ballSpeedX += deltaX * scalingFactor;
 			ballSpeedY += deltaY * scalingFactor;
 		}
+		// reset to max speed if over
+		radarGun();
+		
 		// Save current x, y
 		previousX = currentX;
 		previousY = currentY;
 		return true; 
+	}
+	
+	public void radarGun(){
+		if (ballSpeedX > 0){
+			ballSpeedX = ((ballSpeedX > maxSpeed) ? maxSpeed : ballSpeedX);
+		} else if (ballSpeedX < 0){
+			ballSpeedX = ((ballSpeedX < -maxSpeed) ? -maxSpeed : ballSpeedX);
+		}
+		if (ballSpeedY > 0){
+			ballSpeedY = ((ballSpeedY > maxSpeed) ? maxSpeed : ballSpeedY);
+		} else if (ballSpeedX < 0){
+			ballSpeedY = ((ballSpeedY < -maxSpeed) ? -maxSpeed : ballSpeedY);
+		}
 	}
 }
