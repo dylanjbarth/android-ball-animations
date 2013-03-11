@@ -14,8 +14,8 @@ public class Level1View extends View {
 	// Bounds of screen
 	private int xMin = 0;
 	private int yMin = 0;
-	private int xMax = this.getWidth();
-	private int yMax = this.getHeight();
+	private int xMax;
+	private int yMax;
 	// Ball attributes
 	private float ballRadius = 30;
 	private float ballX = ballRadius + 20;
@@ -37,8 +37,8 @@ public class Level1View extends View {
 	private int score = 0;
 	// For game elements
 	private Paint textColor;
-	private int scoreX = 50;
-	private int scoreY = 50;
+	private int scoreX;
+	private int scoreY;
 
 	public Level1View(Context context){
 		super(context);
@@ -59,9 +59,26 @@ public class Level1View extends View {
 		ballX = rand.nextInt(xMax);
 		ballY = rand.nextInt(yMax);
 		barBounds.set(barX, barY, 5, yMax);
+		scoreX = w/3;
+		scoreY = h/2;
+
+		System.out.print("height: ");
+		System.out.println(yMax);
+		System.out.print("width: ");
+		System.out.println(xMax);
+		System.out.print("scoreX: ");
+		System.out.println(scoreX);
+		System.out.print("scoreY: ");
+		System.out.println(scoreY);
 	}
 
 	public void onDraw(Canvas canvas){
+		// Draw game text elements
+		textColor.setColor(Color.BLACK);
+		textColor.setAlpha(60);
+		textColor.setTextSize(50);
+		String score_str = "Score: " + Integer.toString(score);
+		canvas.drawText(score_str, scoreX, scoreY, textColor);
 		// Draw ball
 		ballBounds.set(ballX-ballRadius, ballY-ballRadius, ballX+ballRadius, ballY+ballRadius);
 		ballColor.setColor(Color.GREEN);
@@ -69,12 +86,7 @@ public class Level1View extends View {
 		// Draw scoring bar (set to left initially in onSizeChanged())
 		barColor.setColor(Color.YELLOW);
 		canvas.drawRect(barBounds, barColor);
-		// Draw game text elements
-		textColor.setColor(Color.BLACK);
-		textColor.setAlpha(125);
-		textColor.setTextSize(50);
-		String score_str = "Score: " + Integer.toString(score);
-		canvas.drawText(score_str, scoreX, scoreY, textColor);
+
 
 		// Perform position calculations
 		update();
@@ -113,7 +125,7 @@ public class Level1View extends View {
 			wallCollision(this, "top");
 		}
 	}
-	
+
 	private void wallCollision(View view, String wall){
 		if (wall == hotWall){
 			score += 1;
