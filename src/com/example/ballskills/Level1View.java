@@ -14,8 +14,8 @@ public class Level1View extends View {
 	// Bounds of screen
 	private int xMin = 0;
 	private int yMin = 0;
-	private int xMax;
-	private int yMax;
+	private int xMax = this.getWidth();
+	private int yMax = this.getHeight();
 	// Ball attributes
 	private float ballRadius = 30;
 	private float ballX = ballRadius + 20;
@@ -35,6 +35,10 @@ public class Level1View extends View {
 	private RectF barBounds;
 	private Paint barColor;
 	private int score = 0;
+	// For game elements
+	private Paint textColor;
+	private int scoreX = 50;
+	private int scoreY = 50;
 
 	public Level1View(Context context){
 		super(context);
@@ -42,6 +46,7 @@ public class Level1View extends View {
 		ballColor = new Paint();
 		barBounds = new RectF();
 		barColor = new Paint();
+		textColor = new Paint();
 		this.setFocusableInTouchMode(true);
 	}
 
@@ -64,6 +69,12 @@ public class Level1View extends View {
 		// Draw scoring bar (set to left initially in onSizeChanged())
 		barColor.setColor(Color.YELLOW);
 		canvas.drawRect(barBounds, barColor);
+		// Draw game text elements
+		textColor.setColor(Color.BLACK);
+		textColor.setAlpha(125);
+		textColor.setTextSize(50);
+		String score_str = "Score: " + Integer.toString(score);
+		canvas.drawText(score_str, scoreX, scoreY, textColor);
 
 		// Perform position calculations
 		update();
@@ -108,12 +119,8 @@ public class Level1View extends View {
 			score += 1;
 			boolean keepGoing = true;
 			while(keepGoing) {
-				System.out.print("hotWall: ");
-				System.out.println(hotWall);
 				Random rand = new Random();
 				int newHotWall = rand.nextInt(4);
-				System.out.print("new hot Wall int: ");
-				System.out.println(newHotWall);
 				if ((newHotWall==0) && (hotWall != "left")){
 					hotWall = "left";
 					barBounds.set(barX, barY, 5, yMax);
