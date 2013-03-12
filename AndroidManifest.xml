@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.ballskills.Level1"
-            android:label="@string/warm_up" 
+            android:label="@string/warm_up"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,8 +25,12 @@
         </activity>
         <activity
             android:name="com.example.ballskills.WarmUp"
-            android:label="@string/level1" 
+            android:label="@string/level1"
             android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.example.ballskills.Level2"
+            android:label="@string/title_activity_level2" >
         </activity>
     </application>
 

@@ -45,6 +45,7 @@ public class WarmUpView extends View {
 	private int scoreX;
 	private int scoreY;
 	private int score = 0;
+	private int maxScore = 100;
 
 	public WarmUpView(Context context){
 		super(context);
@@ -74,7 +75,7 @@ public class WarmUpView extends View {
 		textColor.setColor(Color.BLACK);
 		textColor.setAlpha(60);
 		textColor.setTextSize(50);
-		String score_str = "Score: " + Integer.toString(score);
+		String score_str = "Score: " + Integer.toString(score) + "/" + maxScore;
 		canvas.drawText(score_str, scoreX, scoreY, textColor);
 		// Draw ball
 		ballBounds.set(ballX-ballRadius, ballY-ballRadius, ballX+ballRadius, ballY+ballRadius);
@@ -150,12 +151,13 @@ public class WarmUpView extends View {
 			}
 			if (score == 15){
 				Toast.makeText(getContext(), "You're ready", Toast.LENGTH_SHORT).show();
-			} else if ((score >= 16) && (score < 100)){
+			} else if ((score >= 16) && (score < maxScore)){
 				ballRadius += 10;
-			} else if (score > 100){
+			} else if (score > maxScore){
 				ballRadius = 0;
 				ballSpeedX = 0;
 				ballSpeedY = 0;
+				barThickness = 0;
 				// Alert Dialog 
 				AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
 				alertDialog.setTitle("Warm Up Complete");

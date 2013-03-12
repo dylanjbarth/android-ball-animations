@@ -1,7 +1,5 @@
 package com.example.ballskills;
 
-import java.util.Random;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,8 +19,8 @@ public class Level1View extends View {
 	private int yMax;
 	// Ball attributes
 	private float ballRadius = 30;
-	private float ballX = ballRadius + 20;
-	private float ballY = ballRadius + 40;
+	private float ballX = 50;
+	private float ballY = 50;
 	private float ballSpeedX = 5;
 	private float ballSpeedY = 3;
 	private float maxSpeed = 20;
@@ -37,14 +35,13 @@ public class Level1View extends View {
 	private int scoreX;
 	private int scoreY;
 	private int score = 0;
-	// Game specific variables
-	private int wallHits = 0;
+	private int maxScore = 30;
 	// Enemy Ball
-	private float enemyRadius = 20; 
-	private float enemyX = enemyRadius + 100; 
-	private float enemyY = enemyRadius + 100;
-	private float enemySpeedX;
-	private float enemySpeedY;
+	private float enemyRadius = 30; 
+	private float enemyX = 200;
+	private float enemyY = 300;
+	private float enemySpeedX = 3;
+	private float enemySpeedY = 5;
 	private RectF enemyBallBounds; 
 	private Paint enemyColor;
 
@@ -64,9 +61,6 @@ public class Level1View extends View {
 	public void onSizeChanged(int w, int h, int oldW, int oldH){
 		xMax = w-1;
 		yMax = h-1;
-		Random rand = new Random();
-		ballX = rand.nextInt(xMax);
-		ballY = rand.nextInt(yMax);
 		scoreX = w/3;
 		scoreY = h/2;
 	}
@@ -76,7 +70,7 @@ public class Level1View extends View {
 		textColor.setColor(Color.BLACK);
 		textColor.setAlpha(60);
 		textColor.setTextSize(50);
-		String score_str = "Score: " + Integer.toString(score);
+		String score_str = "Score: " + Integer.toString(score) + "/" + maxScore;
 		canvas.drawText(score_str, scoreX, scoreY, textColor);
 		// Draw ball
 		ballBounds.set(ballX-ballRadius, ballY-ballRadius, ballX+ballRadius, ballY+ballRadius);
@@ -105,38 +99,41 @@ public class Level1View extends View {
 		if (ballX + ballRadius > xMax) {
 			ballSpeedX = -ballSpeedX;
 			ballX = xMax-ballRadius;
-			wallCollision(this);
+			enemyWallCollision();
 		} else if (ballX - ballRadius < xMin) {
 			ballSpeedX = -ballSpeedX;
 			ballX = xMin+ballRadius;
-			wallCollision(this);
+			enemyWallCollision();
 		}
 		// Detect Wall Collision on vertical plane
 		if (ballY + ballRadius > yMax) {
 			ballSpeedY = -ballSpeedY;
 			ballY = yMax - ballRadius;
-			wallCollision(this);
+			enemyWallCollision();
 		} else if (ballY - ballRadius < yMin) {
 			ballSpeedY = -ballSpeedY;
 			ballY = yMin + ballRadius;
-			wallCollision(this);
+			enemyWallCollision();
 		}
 	}
 
-	public void wallCollision(View view){
-		wallHits += 1;
-	}
 
 	public void updateEnemy(){
-		if (wallHits == 1){
-			enemySpeedX = 5;
-			enemySpeedY = 3;
-		} else if (wallHits == 25){
-			enemySpeedX = 8;
-			enemySpeedY = 5;
-		} else if (wallHits == 25){
-			enemySpeedX = 10;
-			enemySpeedY = 8;
+		if (score == maxScore+1){
+			pauseBalls();
+			// Alert Dialog 
+			AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
+			alertDialog.setTitle("Level 1 Complete!");
+			alertDialog.setMessage("Congratulations! Now lets see how you like the blue balls...").setCancelable(false);
+			alertDialog.setPositiveButton("Level 2", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Context context = getContext();
+					Intent intent = new Intent(context, Level2.class);
+					context.startActivity(intent);
+				}
+			});
+			alertDialog.show();
 		}
 		// Update position
 		enemyX += enemySpeedX;
@@ -195,6 +192,7 @@ public class Level1View extends View {
 	}
 
 	public void ballCollision(View view){
+		pauseBalls();
 		// Alert Dialog 
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
 		alertDialog.setTitle("Crash!");
@@ -208,17 +206,22 @@ public class Level1View extends View {
 			}
 		});
 		alertDialog.show();
-		ballSpeedX = 0;
-		ballSpeedY = 0;
-		ballRadius = 0;
-		enemySpeedX = 0;
-		enemySpeedY = 0;
-		enemyRadius = 0;
-
 	}
-	
+
 	public void enemyWallCollision(){
 		score += 1;
+		scalor += .4;
+		float increment = .2f;
+		if (enemySpeedX >= 0){
+			enemySpeedX += increment;
+		} else {
+			enemySpeedX -= increment;
+		}
+		if (enemySpeedY >= 0){
+			enemySpeedX += increment;
+		} else {
+			enemySpeedY -= increment;
+		}
 	}
 
 	public void radarGun(){
@@ -232,5 +235,31 @@ public class Level1View extends View {
 		} else if (ballSpeedX < 0){
 			ballSpeedY = ((ballSpeedY < -maxSpeed) ? -maxSpeed : ballSpeedY);
 		}
+	}
+
+	public void resetBalls(){
+		ballRadius = 30;
+		ballX = ballRadius;
+		ballY = ballRadius;
+		ballSpeedX = 3;
+		ballSpeedY = 5;
+		enemyRadius = ballRadius;
+		enemyX = xMax/3;
+		enemyY = yMax/3;
+		enemySpeedX = 5;
+		enemySpeedY = 3;
+	}
+
+	public void pauseBalls() {
+		ballRadius = 0;
+		ballX = ballRadius;
+		ballY = ballRadius;
+		ballSpeedX = 0;
+		ballSpeedY = 0;
+		enemyRadius = ballRadius;
+		enemyX = 500;
+		enemyY = 500;
+		enemySpeedX = 0;
+		enemySpeedY = 0;
 	}
 }
