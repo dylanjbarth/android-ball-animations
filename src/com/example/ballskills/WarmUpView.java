@@ -40,11 +40,11 @@ public class WarmUpView extends View {
 	private String hotWall = "left";
 	private RectF barBounds;
 	private Paint barColor;
-	private int score = 0;
 	// For game elements
 	private Paint textColor;
 	private int scoreX;
 	private int scoreY;
+	private int score = 0;
 
 	public WarmUpView(Context context){
 		super(context);
@@ -64,18 +64,9 @@ public class WarmUpView extends View {
 		Random rand = new Random();
 		ballX = rand.nextInt(xMax);
 		ballY = rand.nextInt(yMax);
-		barBounds.set(barX, barY, 5, yMax);
+		barBounds.set(barX, barY, barThickness, yMax+1);
 		scoreX = w/3;
 		scoreY = h/2;
-
-		System.out.print("height: ");
-		System.out.println(yMax);
-		System.out.print("width: ");
-		System.out.println(xMax);
-		System.out.print("scoreX: ");
-		System.out.println(scoreX);
-		System.out.print("scoreY: ");
-		System.out.println(scoreY);
 	}
 
 	public void onDraw(Canvas canvas){
@@ -167,9 +158,9 @@ public class WarmUpView extends View {
 				ballSpeedY = 0;
 				// Alert Dialog 
 				AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
-				alertDialog.setTitle("Level 1");
-				alertDialog.setMessage("Avoid the red balls!").setCancelable(false);
-				alertDialog.setPositiveButton("Go!", new DialogInterface.OnClickListener() {
+				alertDialog.setTitle("Warm Up Complete");
+				alertDialog.setMessage("Nice work. The fun is just beginning.").setCancelable(false);
+				alertDialog.setPositiveButton("Level 1", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						Context context = getContext();

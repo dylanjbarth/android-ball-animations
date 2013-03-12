@@ -2,7 +2,10 @@ package com.example.ballskills;
 
 import java.util.Random;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,24 +31,30 @@ public class Level1View extends View {
 	// For touch input
 	private float previousX;
 	private float previousY;
-	// For scoring wall
-	private int barX = 0;
-	private int barY = 0;
-	private String hotWall = "left";
-	private RectF barBounds;
-	private Paint barColor;
-	private int score = 0;
+	private float scalor = 5.0f;
 	// For game elements
 	private Paint textColor;
 	private int scoreX;
 	private int scoreY;
+	private int score = 0;
+	// Game specific variables
+	private int wallHits = 0;
+	// Enemy Ball
+	private float enemyRadius = 20; 
+	private float enemyX = enemyRadius + 100; 
+	private float enemyY = enemyRadius + 100;
+	private float enemySpeedX;
+	private float enemySpeedY;
+	private RectF enemyBallBounds; 
+	private Paint enemyColor;
 
 	public Level1View(Context context){
 		super(context);
+		// Initialize game elements
 		ballBounds = new RectF();
+		enemyBallBounds = new RectF();
 		ballColor = new Paint();
-		barBounds = new RectF();
-		barColor = new Paint();
+		enemyColor = new Paint();
 		textColor = new Paint();
 		this.setFocusableInTouchMode(true);
 	}
@@ -58,18 +67,8 @@ public class Level1View extends View {
 		Random rand = new Random();
 		ballX = rand.nextInt(xMax);
 		ballY = rand.nextInt(yMax);
-		barBounds.set(barX, barY, 5, yMax);
 		scoreX = w/3;
 		scoreY = h/2;
-
-		System.out.print("height: ");
-		System.out.println(yMax);
-		System.out.print("width: ");
-		System.out.println(xMax);
-		System.out.print("scoreX: ");
-		System.out.println(scoreX);
-		System.out.print("scoreY: ");
-		System.out.println(scoreY);
 	}
 
 	public void onDraw(Canvas canvas){
@@ -83,23 +82,21 @@ public class Level1View extends View {
 		ballBounds.set(ballX-ballRadius, ballY-ballRadius, ballX+ballRadius, ballY+ballRadius);
 		ballColor.setColor(Color.GREEN);
 		canvas.drawOval(ballBounds, ballColor);
-		// Draw scoring bar (set to left initially in onSizeChanged())
-		barColor.setColor(Color.YELLOW);
-		canvas.drawRect(barBounds, barColor);
-
-
+		// Draw enemy
+		enemyBallBounds.set(enemyX - enemyRadius, enemyY - enemyRadius, enemyX + enemyRadius, enemyY + enemyRadius);
+		enemyColor.setColor(Color.RED);
+		canvas.drawOval(enemyBallBounds, enemyColor);
 		// Perform position calculations
-		update();
-
+		updateBall();
+		updateEnemy();
 		// Delay for the old human eyes to catch up
 		try {
 			Thread.sleep(3);
 		} catch (InterruptedException e) { }
-
 		invalidate();
 	}
 
-	public void update() {
+	public void updateBall(){
 		// ball x & y change based on ball speed
 		ballX += ballSpeedX;
 		ballY += ballSpeedY;
@@ -108,49 +105,69 @@ public class Level1View extends View {
 		if (ballX + ballRadius > xMax) {
 			ballSpeedX = -ballSpeedX;
 			ballX = xMax-ballRadius;
-			wallCollision(this, "right");
+			wallCollision(this);
 		} else if (ballX - ballRadius < xMin) {
 			ballSpeedX = -ballSpeedX;
 			ballX = xMin+ballRadius;
-			wallCollision(this, "left");
+			wallCollision(this);
 		}
 		// Detect Wall Collision on vertical plane
 		if (ballY + ballRadius > yMax) {
 			ballSpeedY = -ballSpeedY;
 			ballY = yMax - ballRadius;
-			wallCollision(this, "bottom");
+			wallCollision(this);
 		} else if (ballY - ballRadius < yMin) {
 			ballSpeedY = -ballSpeedY;
 			ballY = yMin + ballRadius;
-			wallCollision(this, "top");
+			wallCollision(this);
 		}
 	}
 
-	private void wallCollision(View view, String wall){
-		if (wall == hotWall){
-			score += 1;
-			boolean keepGoing = true;
-			while(keepGoing) {
-				Random rand = new Random();
-				int newHotWall = rand.nextInt(4);
-				if ((newHotWall==0) && (hotWall != "left")){
-					hotWall = "left";
-					barBounds.set(barX, barY, 5, yMax);
-					keepGoing = false;
-				} else if ((newHotWall==1) && (hotWall != "top")){
-					hotWall = "top";
-					barBounds.set(barX, barY, xMax, 5);
-					keepGoing = false;
-				} else if ((newHotWall==2) && (hotWall != "right")){
-					hotWall = "right";
-					barBounds.set(xMax-5, 0, xMax, yMax);
-					keepGoing = false;
-				} else if ((newHotWall==3) && (hotWall != "bottom")){
-					hotWall = "bottom";
-					barBounds.set(xMin, yMax-5, xMax, yMax);
-					keepGoing = false;
-				}
-			}
+	public void wallCollision(View view){
+		wallHits += 1;
+	}
+
+	public void updateEnemy(){
+		if (wallHits == 1){
+			enemySpeedX = 5;
+			enemySpeedY = 3;
+		} else if (wallHits == 25){
+			enemySpeedX = 8;
+			enemySpeedY = 5;
+		} else if (wallHits == 25){
+			enemySpeedX = 10;
+			enemySpeedY = 8;
+		}
+		// Update position
+		enemyX += enemySpeedX;
+		enemyY += enemySpeedY;
+		// Detect wall collision and react
+		if (enemyX + enemyRadius > xMax) {
+			enemySpeedX = -enemySpeedX;
+			enemyX = xMax - enemyRadius;
+			enemyWallCollision();
+		} else if (enemyX - enemyRadius < xMin) {
+			enemySpeedX = -enemySpeedX;
+			enemyX = xMin + enemyRadius;
+			enemyWallCollision();
+		}
+		if (enemyY + enemyRadius > yMax) {
+			enemySpeedY = -enemySpeedY;
+			enemyY = yMax - enemyRadius;
+			enemyWallCollision();
+		} else if (enemyY - enemyRadius < yMin) {
+			enemySpeedY = -enemySpeedY;
+			enemyY = yMin + enemyRadius;
+			enemyWallCollision();
+		}
+		// Check for ball collisions: help ==> http://devmag.org.za/2009/04/13/basic-collision-detection-in-2d-part-1/
+		// Calculate how far centers of circle are from one another
+		float diffX = ballX - enemyX;
+		float diffY = ballY - enemyY;
+		// Square root each difference squared
+		float diff = (float) Math.sqrt((diffX * diffX) + (diffY * diffY));
+		if (diff <= (ballRadius + enemyRadius)) {
+			ballCollision(this);
 		}
 	}
 
@@ -160,7 +177,7 @@ public class Level1View extends View {
 		float currentX = event.getX();
 		float currentY = event.getY();
 		float deltaX, deltaY;
-		float scalingFactor = 5.0f / ((xMax > yMax) ? yMax : xMax);
+		float scalingFactor = scalor / ((xMax > yMax) ? yMax : xMax);
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_MOVE:
 			deltaX = currentX - previousX;
@@ -175,6 +192,33 @@ public class Level1View extends View {
 		previousX = currentX;
 		previousY = currentY;
 		return true; 
+	}
+
+	public void ballCollision(View view){
+		// Alert Dialog 
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
+		alertDialog.setTitle("Crash!");
+		alertDialog.setMessage("Pick yourself up grasshopper.").setCancelable(false);
+		alertDialog.setPositiveButton("Restart...", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Context context = getContext();
+				Intent intent = new Intent(context, Level1.class);
+				context.startActivity(intent);
+			}
+		});
+		alertDialog.show();
+		ballSpeedX = 0;
+		ballSpeedY = 0;
+		ballRadius = 0;
+		enemySpeedX = 0;
+		enemySpeedY = 0;
+		enemyRadius = 0;
+
+	}
+	
+	public void enemyWallCollision(){
+		score += 1;
 	}
 
 	public void radarGun(){
